@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # ReconX — Enterprise Trade Reconciliation Platform (Student Starter)
 
 > Deutsche Bank — TDI 2026 Graduate Technical Training Programme
@@ -257,3 +258,6 @@ A 20-minute end-to-end walkthrough:
 ---
 
 ## Good luck — and ask your instructors anything 🏦
+=======
+# db2026-cohort6-team4-reconX
+>>>>>>> c06a60c95d9491b5e4dca2666e40f8270002766e
