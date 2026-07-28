@@ -1,5 +1,7 @@
 # TICKET-ADV006 — ER model (8 entities)
 
+[//]: # (The code for raising a pull request regarding the ER diagram is specified below)
+
 ```mermaid
 erDiagram
     COUNTERPARTIES ||--o{ TRADES : "executes"
