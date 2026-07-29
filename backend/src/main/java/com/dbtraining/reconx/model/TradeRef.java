@@ -17,6 +17,7 @@ import java.util.regex.Pattern;
  * OBSERVE: TradeRef.of("EQU-20260602-0001") works; .of("foo") throws.
  * ============================================================================
  */
+
 public record TradeRef(String value) {
 
     private static final Pattern PATTERN = Pattern.compile("^[A-Z]{3}-\\d{8}-\\d{4}$");
