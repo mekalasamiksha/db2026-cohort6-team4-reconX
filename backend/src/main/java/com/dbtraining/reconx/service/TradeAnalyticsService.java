@@ -65,7 +65,7 @@ public class TradeAnalyticsService {
     }
 
     // Raising a PR under Ticket34 as Ticket18 PR is already done
-    //Following student guides to do so
+    // Following student guides to do so
     private long counterpartyIdOf(TradeType t) {
         // TODO(TICKET-ADV018): exhaustive switch over the sealed TradeType
         //   hierarchy returning t.counterpartyId() for each concrete subtype.
