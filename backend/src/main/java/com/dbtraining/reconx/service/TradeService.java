@@ -56,15 +56,57 @@ public class TradeService {
     }
 
     public Trade create(TradeRequest req, String actor) {
-        // TODO(TICKET-ADV064): reject duplicate tradeRef via DuplicateTradeRefException,
-        //   build a new Trade with instrument + counterparty looked up from
-        //   their repos (throw TradeNotFoundException on miss), status = "PENDING",
-        //   save, then:
-        //     - metrics.incrementTradeCreated() + metrics.recordTradeValue(qty*price) — TICKET-ADV083
-        //     - events.publish(new TradeEvent(... TRADE_CREATED ... actor ...)) — TICKET-ADV129
-        throw new UnsupportedOperationException("TICKET-ADV064");
+
+    if (tradeRepo.findByTradeRef(req.tradeRef()).isPresent()) {
+        throw new DuplicateTradeRefException(req.tradeRef());
     }
 
+    var instrument = instRepo.findById(req.instrumentId())
+            .orElseThrow(() ->
+                    new TradeNotFoundException("Instrument not found"));
+
+    var counterparty = cpRepo.findById(req.counterpartyId())
+            .orElseThrow(() ->
+                    new TradeNotFoundException("Counterparty not found"));
+
+    Trade trade = new Trade();
+    trade.setTradeRef(req.tradeRef());
+    trade.setInstrument(instrument);
+    trade.setCounterparty(counterparty);
+    trade.setAssetClass(req.assetClass());
+    trade.setSide(req.side());
+    trade.setQuantity(req.quantity());
+    trade.setPrice(req.price());
+    trade.setTradeDate(req.tradeDate());
+    trade.setStatus("PENDING");
+
+    Trade saved = tradeRepo.save(trade);
+
+    // These belong to later tickets.
+    // Uncomment once ADV083 and ADV129 are implemented.
+
+    /*
+    metrics.incrementTradeCreated();
+
+    metrics.recordTradeValue(
+            req.quantity()
+               .multiply(req.price())
+               .doubleValue());
+
+    events.publish(
+            new TradeEvent(
+                    UUID.randomUUID(),
+                    saved.getTradeRef(),
+                    TradeEvent.EventType.TRADE_CREATED,
+                    Instant.now(),
+                    actor,
+                    null,
+                    saved.getStatus()
+            ));
+    */
+
+    return saved;
+}
     public Trade update(Long id, TradeRequest req, String actor) {
         // TODO(TICKET-ADV065): load by id (throw TradeNotFoundException if missing),
         //   copy mutable fields from req, save, publish a TRADE_UPDATED event.

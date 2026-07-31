@@ -1,6 +1,13 @@
 -- ============================================================================
 -- TICKET-ADV007 — Convert trades to monthly range-partitioned table (Postgres)
 --
+-- WARNING: destructive. Run in a maintenance window — drops and recreates the
+-- trades table as a partitioned parent, then creates the monthly children.
+-- ============================================================================
+
+-- ============================================================================
+-- Convert trades to monthly range-partitioned table (Postgres)
+--
 -- WARNING: destructive. Run in a maintenance window — copies the entire
 -- trades table into a new partitioned trades, then renames.
 -- ============================================================================
