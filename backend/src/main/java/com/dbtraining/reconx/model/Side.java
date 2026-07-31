@@ -1,3 +1,5 @@
+//Implemeted Ticket - ADV019 (EquityTrade with builde pattern)
+
 package com.dbtraining.reconx.model;
 
 /**
