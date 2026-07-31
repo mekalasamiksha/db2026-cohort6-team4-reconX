@@ -114,6 +114,12 @@
             <scope>runtime</scope>
         </dependency>
 
+        <dependency>
+            <groupId>com.dbtraining.reconx</groupId>
+            <artifactId>recon-audit-starter</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+
         <!-- Kafka (ADV128-ADV136) -->
         <dependency>
             <groupId>org.springframework.kafka</groupId>
