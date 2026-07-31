@@ -43,6 +43,24 @@ public final class EquityTrade implements TradeType {
     public Side side()               { return side; }
     public long counterpartyId()     { return counterpartyId; }
 
+    /** equals: two EquityTrades are equal iff their tradeRef is equal. */
+    @Override
+    public boolean equals(Object o) {
+        return (o instanceof EquityTrade other) && tradeRef.equals(other.tradeRef);
+    }
+
+    @Override public int hashCode() {
+        return tradeRef.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        // TODO(TICKET-ADV030): "EquityTrade[ref=..., symbol=..., qty=..., price=... CCY, side=...]"
+        //                     — must NOT leak counterparty PII.
+        throw new UnsupportedOperationException("TICKET-ADV030");
+    }
+
+    /** Fluent builder. Required fields validated in {@link #build()}. */
     public static final class Builder {
         private TradeRef tradeRef;
         private String instrumentSymbol;
