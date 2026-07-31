@@ -76,16 +76,28 @@ public class TradeAnalyticsService {
 
     /** TICKET-ADV036 — P&L per instrument symbol (sign by Side). */
     public Map<String, BigDecimal> pnlByInstrument(List<EquityTrade> equityTrades) {
-        // TODO(TICKET-ADV036): groupingBy(EquityTrade::instrumentSymbol,
-        //   mapping(this::pnl, reducing(BigDecimal.ZERO, BigDecimal::add))).
-        //   Side.SELL contributes positively; Side.BUY contributes negatively.
-        throw new UnsupportedOperationException("TICKET-ADV036");
-    }
 
-    private BigDecimal pnl(EquityTrade t) {
-        // TODO(TICKET-ADV036): BigDecimal abs = price * qty; SELL -> abs, BUY -> abs.negate().
-        throw new UnsupportedOperationException("TICKET-ADV036");
-    }
+    return equityTrades.stream().collect(Collectors.groupingBy(
+            EquityTrade::instrumentSymbol,
+            Collectors.mapping(
+                    this::pnl,
+                    Collectors.reducing(
+                            BigDecimal.ZERO,
+                            BigDecimal::add
+                    )
+            )
+    ));
+}
+
+   private BigDecimal pnl(EquityTrade t) {
+
+    BigDecimal abs = t.price().multiply(t.quantity());
+
+    return t.side() == com.dbtraining.reconx.model.Side.SELL
+            ? abs
+            : abs.negate();
+}
+
 
     // Raising a PR under Ticket34 as Ticket18 PR is already done
     // Following student guides to do so
@@ -102,4 +114,16 @@ public class TradeAnalyticsService {
     }
 
     public record NotionalSummary(long count, BigDecimal total) {}
+
+    public BigDecimal calculateVwap(List<EquityTrade> trades) {
+        return trades.stream()
+                .collect(new VwapCollector());
+    }
+
+    public BigDecimal calculateParallelVwap(List<EquityTrade> trades) {
+        return trades.parallelStream()
+                .collect(new VwapCollector());
+    }
+
+
 }
