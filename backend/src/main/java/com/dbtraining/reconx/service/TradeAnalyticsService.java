@@ -88,11 +88,7 @@ public class TradeAnalyticsService {
             ? abs
             : abs.negate();
 }
-        // TODO(TICKET-ADV036): groupingBy(EquityTrade::instrumentSymbol,
-        // mapping(this::pnl, reducing(BigDecimal.ZERO, BigDecimal::add))).
-        // Side.SELL contributes positively; Side.BUY contributes negatively.
-        throw new UnsupportedOperationException("TICKET-ADV036");
-    }
+      
 
     private long counterpartyIdOf(TradeType t) {
         // TODO(TICKET-ADV018): exhaustive switch over the sealed TradeType

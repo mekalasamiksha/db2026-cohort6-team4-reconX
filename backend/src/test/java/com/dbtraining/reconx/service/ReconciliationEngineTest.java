@@ -46,6 +46,15 @@ class ReconciliationEngineTest {
         assertThat(captor.getValue().status()).isEqualTo(ReconResult.Status.MATCHED);
     }
 
+        // when
+        svc.runRecon(List.of(i), List.of(e));
+
+        // then
+        ArgumentCaptor<ReconResult> captor = ArgumentCaptor.forClass(ReconResult.class);
+        verify(repo).save(captor.capture());
+        assertThat(captor.getValue().tradeRef()).isEqualTo("TRD-1");
+        assertThat(captor.getValue().status()).isEqualTo(ReconResult.Status.MATCHED);
+    }
     @Test
     void testReconcile_exactMatch_returnsMatched() {
         // TODO(TICKET-ADV040): two identical EquityTrades + EXACT rule -> one ReconResult with status MATCHED.
