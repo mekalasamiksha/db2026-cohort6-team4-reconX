@@ -35,6 +35,7 @@ public final class FXTrade implements TradeType {
     @Override public LocalDate tradeDate()   { return tradeDate; }
     @Override public AssetClass assetClass() { return AssetClass.FX; }
     @Override public Money notional()        { return new Money(notionalCcy1.multiply(fxRate), ccy2); }
+    @Override public int compareTo(TradeType other) { return this.tradeDate().compareTo(other.tradeDate()) * -1; }
 
     public Currency ccy1()           { return ccy1; }
     public Currency ccy2()           { return ccy2; }
@@ -42,6 +43,20 @@ public final class FXTrade implements TradeType {
     public BigDecimal fxRate()       { return fxRate; }
     public Side side()               { return side; }
     public long counterpartyId()     { return counterpartyId; }
+
+    @Override public boolean equals(Object o) {
+        return (o instanceof FXTrade other) && tradeRef.equals(other.tradeRef);
+    }
+    @Override public int hashCode() { return tradeRef.hashCode(); }
+
+    @Override
+    public String toString() {
+        return "FXTrade[ref=%s, %s/%s, notional=%s %s, rate=%s, side=%s]"
+                .formatted(tradeRef, ccy1.getCurrencyCode(), ccy2.getCurrencyCode(),
+                        notionalCcy1.toPlainString(), ccy1.getCurrencyCode(), fxRate.toPlainString(), side);
+        // NOTE: deliberately omit counterpartyId and any settlement-specific PII from logs.
+    }
+    }
 
     public static final class Builder {
         private TradeRef tradeRef;
