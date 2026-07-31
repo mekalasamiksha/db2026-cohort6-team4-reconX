@@ -43,6 +43,16 @@ public final class FXTrade implements TradeType {
     public Side side()               { return side; }
     public long counterpartyId()     { return counterpartyId; }
 
+    @Override public boolean equals(Object o) {
+        return (o instanceof FXTrade other) && tradeRef.equals(other.tradeRef);
+    }
+    @Override public int hashCode() { return tradeRef.hashCode(); }
+
+    @Override public String toString() {
+        // TODO(TICKET-ADV030): "FXTrade[ref=..., CCY1/CCY2, notional=... CCY1, rate=..., side=...]"
+        throw new UnsupportedOperationException("TICKET-ADV030");
+    }
+
     public static final class Builder {
         private TradeRef tradeRef;
         private Currency ccy1, ccy2;
