@@ -38,6 +38,9 @@
             <dbms type="postgresql"/>
         </preConditions>
         <sql>DROP TABLE IF EXISTS trades CASCADE;</sql>
+        <rollback>
+            <sql>DROP TABLE IF EXISTS trades CASCADE;</sql>
+        </rollback>
     </changeSet>
 
     <!-- Step 2: range-partitioned parent on trade_date. PK / UNIQUE include
@@ -72,7 +75,7 @@
         </rollback>
     </changeSet>
 
-    <!-- Step 3: rolling 12 monthly partitions (current_month - 11 .. current_month).
+    <!-- Step 3: rolling 12 monthly partitions (current_month - 11 .. current).
          Generated inside a DO block so we don't hard-code dates that go stale. -->
     <changeSet id="004-trades-monthly-partitions" author="student">
         <preConditions onFail="MARK_RAN">
