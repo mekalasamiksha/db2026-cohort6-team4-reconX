@@ -24,23 +24,29 @@ class ReconciliationEngineTest {
     }
 
    @Test
-void testReconcile_priceTolerance_withinThreshold() {
-   EquityTrade internal = equity("TRD-002", "100.00", "10");
-   EquityTrade external = equity("TRD-002", "100.50", "10");
-
-   List<ReconResult> results = engine.reconcile(
-           List.of(internal), List.of(external), ReconciliationRule.PRICE_TOLERANCE_1PCT);
-
-   Assertions.assertEquals(1, results.size());
-   Assertions.assertEquals(ReconResult.Status.MATCHED, results.get(0).status());
-}
+    void testReconcile_priceTolerance_withinThreshold() {
+       EquityTrade internal = equity("TRD-002", "100.00", "10");
+       EquityTrade external = equity("TRD-002", "100.50", "10");
+    
+       List<ReconResult> results = engine.reconcile(
+               List.of(internal), List.of(external), ReconciliationRule.PRICE_TOLERANCE_1PCT);
+    
+       Assertions.assertEquals(1, results.size());
+       Assertions.assertEquals(ReconResult.Status.MATCHED, results.get(0).status());
+    }
 
     @Test
     void testReconcile_missingCounterpartyTrade_returnsBreak() {
-        // TODO(TICKET-ADV042): internal trade with no external counterpart -> status BREAK,
-        //                     discrepancyType = "MISSING_EXTERNAL".
-        org.junit.jupiter.api.Assertions.fail("TICKET-ADV042 not implemented yet");
+        var in  = List.<TradeType>of(equity("EQU-20260603-0003", "100.00", "10"));
+        var out = List.<TradeType>of();
+
+        List<ReconResult> results = engine.reconcile(in, out, ReconciliationRule.EXACT);
+
+        assertThat(results).hasSize(1);
+        assertThat(results.get(0).status()).isEqualTo(ReconResult.Status.BREAK);
+        assertThat(results.get(0).discrepancyType()).isEqualTo("MISSING_EXTERNAL");
     }
+
 
     @Test
     void testReconcile_emptyInternal_returnsEmpty() {
