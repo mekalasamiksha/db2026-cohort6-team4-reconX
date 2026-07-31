@@ -35,6 +35,7 @@ public final class FXTrade implements TradeType {
     @Override public LocalDate tradeDate()   { return tradeDate; }
     @Override public AssetClass assetClass() { return AssetClass.FX; }
     @Override public Money notional()        { return new Money(notionalCcy1.multiply(fxRate), ccy2); }
+    @Override public int compareTo(TradeType other) { return this.tradeDate().compareTo(other.tradeDate()) * -1; }
 
     public Currency ccy1()           { return ccy1; }
     public Currency ccy2()           { return ccy2; }
@@ -48,9 +49,13 @@ public final class FXTrade implements TradeType {
     }
     @Override public int hashCode() { return tradeRef.hashCode(); }
 
-    @Override public String toString() {
-        // TODO(TICKET-ADV030): "FXTrade[ref=..., CCY1/CCY2, notional=... CCY1, rate=..., side=...]"
-        throw new UnsupportedOperationException("TICKET-ADV030");
+    @Override
+    public String toString() {
+        return "FXTrade[ref=%s, %s/%s, notional=%s %s, rate=%s, side=%s]"
+                .formatted(tradeRef, ccy1.getCurrencyCode(), ccy2.getCurrencyCode(),
+                        notionalCcy1.toPlainString(), ccy1.getCurrencyCode(), fxRate.toPlainString(), side);
+        // NOTE: deliberately omit counterpartyId and any settlement-specific PII from logs.
+    }
     }
 
     public static final class Builder {

@@ -35,6 +35,7 @@ public final class EquityTrade implements TradeType {
     @Override public LocalDate tradeDate()  { return tradeDate; }
     @Override public AssetClass assetClass(){ return AssetClass.EQUITY; }
     @Override public Money notional()       { return new Money(quantity.multiply(price), currency); }
+    @Override public int compareTo(TradeType other) { return this.tradeDate().compareTo(other.tradeDate()) * -1; }
 
     public String instrumentSymbol() { return instrumentSymbol; }
     public BigDecimal quantity()     { return quantity; }
@@ -55,9 +56,10 @@ public final class EquityTrade implements TradeType {
 
     @Override
     public String toString() {
-        // TODO(TICKET-ADV030): "EquityTrade[ref=..., symbol=..., qty=..., price=... CCY, side=...]"
-        //                     — must NOT leak counterparty PII.
-        throw new UnsupportedOperationException("TICKET-ADV030");
+        return "EquityTrade[ref=%s, symbol=%s, qty=%s, price=%s %s, side=%s]"
+                .formatted(tradeRef, instrumentSymbol, quantity.toPlainString(),
+                        price.toPlainString(), currency.getCurrencyCode(), side);
+        // NOTE: deliberately omit counterpartyId and other PII fields from logs.
     }
 
     /** Fluent builder. Required fields validated in {@link #build()}. */
