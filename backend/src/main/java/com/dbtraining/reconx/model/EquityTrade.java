@@ -35,6 +35,7 @@ public final class EquityTrade implements TradeType {
     @Override public LocalDate tradeDate()  { return tradeDate; }
     @Override public AssetClass assetClass(){ return AssetClass.EQUITY; }
     @Override public Money notional()       { return new Money(quantity.multiply(price), currency); }
+    @Override public int compareTo(TradeType other) { return this.tradeDate().compareTo(other.tradeDate()) * -1; }
 
     public String instrumentSymbol() { return instrumentSymbol; }
     public BigDecimal quantity()     { return quantity; }
@@ -43,6 +44,25 @@ public final class EquityTrade implements TradeType {
     public Side side()               { return side; }
     public long counterpartyId()     { return counterpartyId; }
 
+    /** equals: two EquityTrades are equal iff their tradeRef is equal. */
+    @Override
+    public boolean equals(Object o) {
+        return (o instanceof EquityTrade other) && tradeRef.equals(other.tradeRef);
+    }
+
+    @Override public int hashCode() {
+        return tradeRef.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return "EquityTrade[ref=%s, symbol=%s, qty=%s, price=%s %s, side=%s]"
+                .formatted(tradeRef, instrumentSymbol, quantity.toPlainString(),
+                        price.toPlainString(), currency.getCurrencyCode(), side);
+        // NOTE: deliberately omit counterpartyId and other PII fields from logs.
+    }
+
+    /** Fluent builder. Required fields validated in {@link #build()}. */
     public static final class Builder {
         private TradeRef tradeRef;
         private String instrumentSymbol;
