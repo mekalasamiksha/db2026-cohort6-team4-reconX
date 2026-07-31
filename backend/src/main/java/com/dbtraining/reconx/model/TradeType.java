@@ -1,3 +1,4 @@
+// Implemented Ticket-ADV018
 package com.dbtraining.reconx.model;
 
 import java.time.LocalDate;
@@ -44,14 +45,14 @@ public sealed interface TradeType
     /** Discriminator for switch expressions and persistence mapping. */
     AssetClass assetClass();
 
-    Comparator<TradeType> NATURAL = Comparator
-            .comparing(TradeType::tradeDate).reversed()
-            .thenComparing(t -> t.tradeRef().value());
-
-    @Override
-    default int compareTo(TradeType other) {
-        return NATURAL.compare(this, other);
-    }
+//    Comparator<TradeType> NATURAL = Comparator
+//            .comparing(TradeType::tradeDate).reversed()
+//            .thenComparing(t -> t.tradeRef().value());
+//
+//    @Override
+//    default int compareTo(TradeType other) {
+//        return NATURAL.compare(this, other);
+//    }
 
     enum AssetClass { EQUITY, FX, BOND, DERIVATIVE }
 }
