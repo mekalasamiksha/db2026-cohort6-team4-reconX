@@ -15,7 +15,7 @@ spring:
     name: reconx
   profiles:
     active: ${SPRING_PROFILES_ACTIVE:dev}
-    jmx:
+  jmx:
       enabled: true
 
   # ADV012 — Liquibase classpath wiring (the classic starter bug is missing the
