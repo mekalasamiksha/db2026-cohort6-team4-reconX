@@ -68,6 +68,7 @@ public final class DerivativeTrade implements TradeType {
      * @return {@link AssetClass#DERIVATIVE}.
      */
     @Override public AssetClass assetClass() { return AssetClass.DERIVATIVE; }
+    @Override public int compareTo(TradeType other) { return this.tradeDate().compareTo(other.tradeDate()) * -1; }
 
     /**
  * Orders trades by trade date descending (newest first).

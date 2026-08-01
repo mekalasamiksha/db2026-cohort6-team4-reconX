@@ -82,6 +82,7 @@ public final class EquityTrade implements TradeType {
      * @return quantity multiplied by price in the trade currency.
      */
     @Override public Money notional()       { return new Money(quantity.multiply(price), currency); }
+    @Override public int compareTo(TradeType other) { return this.tradeDate().compareTo(other.tradeDate()) * -1; }
 
     /**
  * Orders trades by trade date descending (newest first).

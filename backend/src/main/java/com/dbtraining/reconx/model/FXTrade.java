@@ -127,7 +127,7 @@ public final class FXTrade implements TradeType {
      */
     public long counterpartyId()     { return counterpartyId; }
     /**
- * Equality(between EquityTrades) based solely on tradeRef.
+ * Equality(between FXTrades) based solely on tradeRef.
  */
     @Override public boolean equals(Object o) {
         return (o instanceof FXTrade other) && tradeRef.equals(other.tradeRef);
