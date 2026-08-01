@@ -29,7 +29,7 @@
     <groupId>com.dbtraining.reconx</groupId>
     <artifactId>reconx-parent</artifactId>
     <version>1.0.0-SNAPSHOT</version>
-    <packaging>jar</packaging>
+    <!-- <packaging>pom</packaging> -->
     <name>reconx</name>
     <description>ReconX — Enterprise Trade Reconciliation Platform (Advanced Track)</description>
 
