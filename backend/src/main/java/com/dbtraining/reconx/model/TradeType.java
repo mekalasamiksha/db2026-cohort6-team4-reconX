@@ -33,16 +33,28 @@ public sealed interface TradeType
         extends Comparable<TradeType>
         permits EquityTrade, FXTrade, BondTrade, DerivativeTrade {
 
-    /** Stable natural key. Drives equals/hashCode. */
+    /**
+     * Stable natural key for the trade.
+     * @return unique trade reference used for identity and reconciliation.
+     */
     TradeRef tradeRef();
 
-    /** Notional value of the trade for reconciliation summaries. */
+    /**
+     * Monetary notional value used by reconciliation and reporting.
+     * @return notional amount expressed in the trade currency.
+     */
     Money notional();
 
-    /** Business date the trade was struck on. */
+    /**
+     * Business date when the trade was executed.
+     * @return trade business date.
+     */
     LocalDate tradeDate();
 
-    /** Discriminator for switch expressions and persistence mapping. */
+    /**
+     * Asset class discriminator for routing and persistence.
+     * @return asset class of this trade.
+     */
     AssetClass assetClass();
 
 //    Comparator<TradeType> NATURAL = Comparator

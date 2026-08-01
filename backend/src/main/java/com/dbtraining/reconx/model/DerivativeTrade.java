@@ -16,6 +16,9 @@ import java.util.Objects;
  */
 public final class DerivativeTrade implements TradeType {
 
+    /**
+     * Option type for a derivative trade.
+     */
     public enum OptionType { CALL, PUT }
 
     private final TradeRef tradeRef;
@@ -42,28 +45,97 @@ public final class DerivativeTrade implements TradeType {
         this.counterpartyId = b.counterpartyId;
     }
 
+    /**
+     * Create a new builder for an immutable {@link DerivativeTrade}.
+     * @return fresh builder instance.
+     */
     public static Builder builder() { return new Builder(); }
 
+    /**
+     * Stable natural key for the trade.
+     * @return unique trade reference.
+     */
     @Override public TradeRef tradeRef()     { return tradeRef; }
+
+    /**
+     * Business date when the trade was agreed.
+     * @return trade date.
+     */
     @Override public LocalDate tradeDate()   { return tradeDate; }
+
+    /**
+     * The trade asset class.
+     * @return {@link AssetClass#DERIVATIVE}.
+     */
     @Override public AssetClass assetClass() { return AssetClass.DERIVATIVE; }
+
+    /**
+ * Orders trades by trade date descending (newest first).
+ *
+ * @param other the trade to compare against
+ * @return a negative integer, zero, or positive integer as this trade
+ *         is newer than, equal to, or older than the specified trade
+ */
     @Override public int compareTo(TradeType other) { return this.tradeDate().compareTo(other.tradeDate()) * -1; }
 
-    /** Simplified notional = strike * quantity in the trade currency. */
+    /**
+     * Simplified derivative notional = strike * quantity.
+     * @return notional amount in the trade currency.
+     */
     @Override public Money notional() {
-        // TODO(TICKET-ADV022): return new Money(strike * quantity, currency).
-        throw new UnsupportedOperationException("TICKET-ADV022");
+        return new Money(strike.multiply(quantity), currency);
     }
 
+    /**
+     * Underlying instrument for the derivative.
+     * @return underlying symbol.
+     */
     public String underlying()       { return underlying; }
-    public BigDecimal strike()       { return strike; }
-    public BigDecimal quantity()     { return quantity; }
-    public LocalDate expiry()        { return expiry; }
-    public OptionType optionType()   { return optionType; }
-    public Currency currency()       { return currency; }
-    public Side side()               { return side; }
-    public long counterpartyId()     { return counterpartyId; }
 
+    /**
+     * Derivative strike price.
+     * @return strike.
+     */
+    public BigDecimal strike()       { return strike; }
+
+    /**
+     * Number of option contracts.
+     * @return quantity.
+     */
+    public BigDecimal quantity()     { return quantity; }
+
+    /**
+     * Expiry date of the derivative.
+     * @return expiry date.
+     */
+    public LocalDate expiry()        { return expiry; }
+
+    /**
+     * Option type for the derivative.
+     * @return option type.
+     */
+    public OptionType optionType()   { return optionType; }
+
+    /**
+     * Currency used for the derivative's notional.
+     * @return currency.
+     */
+    public Currency currency()       { return currency; }
+
+    /**
+     * Whether the trade is a buy or sell.
+     * @return trade side.
+     */
+    public Side side()               { return side; }
+
+    /**
+     * Counterparty identifier used for matching and reporting.
+     * @return counterparty id.
+     */
+    public long counterpartyId()     { return counterpartyId; }
+    /**
+ * Equality(between EquityTrades) based solely on tradeRef.
+ */
     @Override public boolean equals(Object o) {return (o instanceof DerivativeTrade other) && tradeRef.equals(other.tradeRef);
     }
     @Override public int hashCode() {
@@ -87,17 +159,72 @@ public final class DerivativeTrade implements TradeType {
         private Side side;
         private long counterpartyId;
 
+        /**
+ * @param v trade reference
+ * @return this builder
+ */
         public Builder tradeRef(TradeRef v)        { this.tradeRef = v; return this; }
+        /**
+ * @param v underlying asset
+ * @return this builder
+ */
         public Builder underlying(String v)        { this.underlying = v; return this; }
+        /**
+ * @param v strike price
+ * @return this builder
+ */
         public Builder strike(BigDecimal v)        { this.strike = v; return this; }
+        /**
+ * @param v quantity
+ * @return this builder
+ */
         public Builder quantity(BigDecimal v)      { this.quantity = v; return this; }
+        /**
+ * @param v expiry date
+ * @return this builder
+ */
         public Builder expiry(LocalDate v)         { this.expiry = v; return this; }
+        /**
+ * @param v option type
+ * @return this builder
+ */
         public Builder optionType(OptionType v)    { this.optionType = v; return this; }
+        /**
+ * @param v currency code
+ * @return this builder
+ */
         public Builder currency(String code)       { this.currency = Currency.getInstance(code); return this; }
+        /**
+ * @param v trade side
+ * @return this builder
+ */
         public Builder side(Side v)                { this.side = v; return this; }
+        /**
+ * @param v trade date
+ * @return this builder
+ */
         public Builder tradeDate(LocalDate v)      { this.tradeDate = v; return this; }
+        /**
+ * @param v counterparty ID
+ * @return this builder
+ */
         public Builder counterpartyId(long v)      { this.counterpartyId = v; return this; }
 
+        /**
+         * Build the immutable {@link DerivativeTrade}, validating required fields.
+         *
+         * @return a fully-constructed, validated {@code DerivativeTrade} — never {@code null}.
+         * @throws NullPointerException if any required field
+         *                              ({@code tradeRef}, {@code underlying},
+         *                              {@code strike}, {@code quantity},
+         *                              {@code expiry}, {@code optionType},
+         *                              {@code currency}, {@code side},
+         *                              {@code tradeDate}) is missing.
+         * @throws IllegalStateException if {@code underlying} is blank,
+         *                               if {@code strike} or {@code quantity}
+         *                               are not strictly positive, or if
+         *                               {@code expiry} is not after {@code tradeDate}.
+         */
         public DerivativeTrade build() {
             Objects.requireNonNull(tradeRef, "tradeRef");
             Objects.requireNonNull(underlying, "underlying");

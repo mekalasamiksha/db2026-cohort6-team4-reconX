@@ -29,7 +29,7 @@
     <groupId>com.dbtraining.reconx</groupId>
     <artifactId>reconx-parent</artifactId>
     <version>1.0.0-SNAPSHOT</version>
-    <packaging>pom</packaging>
+    <packaging>jar</packaging>
     <name>reconx</name>
     <description>ReconX — Enterprise Trade Reconciliation Platform (Advanced Track)</description>
 
@@ -40,13 +40,6 @@
         <testcontainers.version>1.20.3</testcontainers.version>
         <hypersistence.version>3.9.0</hypersistence.version>
     </properties>
-    <modules>
-        <module>common</module>
-        <module>domain</module>
-        <module>repository</module>
-        <module>service</module>
-        <module>api</module>
-    </modules>
     <dependencies>
         <!-- Web + Validation (ADV063-ADV071) -->
         <dependency>
@@ -214,6 +207,15 @@
                             <version>${mapstruct.version}</version>
                         </path>
                     </annotationProcessorPaths>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.11.2</version>
+                <configuration>
+                    <doclint>all,-missing</doclint>
+                    <failOnError>true</failOnError>
                 </configuration>
             </plugin>
             <!-- ADV046 / ADV156 — JaCoCo coverage gate (>=85%) -->
