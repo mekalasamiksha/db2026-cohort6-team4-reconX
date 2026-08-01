@@ -39,27 +39,92 @@ public final class BondTrade implements TradeType {
         this.counterpartyId = b.counterpartyId;
     }
 
+    /**
+     * Create a new builder for an immutable {@link BondTrade}.
+     * @return fresh builder instance.
+     */
     public static Builder builder() { return new Builder(); }
 
+    /**
+     * Stable natural key for the trade.
+     * @return unique trade reference.
+     */
     @Override public TradeRef tradeRef()     { return tradeRef; }
+
+    /**
+     * Business date when the trade was agreed.
+     * @return trade date.
+     */
     @Override public LocalDate tradeDate()   { return tradeDate; }
+
+    /**
+     * The trade asset class.
+     * @return {@link AssetClass#BOND}.
+     */
     @Override public AssetClass assetClass() { return AssetClass.BOND; }
     @Override public int compareTo(TradeType other) { return this.tradeDate().compareTo(other.tradeDate()) * -1; }
 
-    /** Notional = faceValue in the bond's currency. */
+    /**
+ * Orders trades by trade date descending (newest first).
+ *
+ * @param other the trade to compare against
+ * @return a negative integer, zero, or positive integer as this trade
+ *         is newer than, equal to, or older than the specified trade
+ */
+    @Override public int compareTo(TradeType other) { return this.tradeDate().compareTo(other.tradeDate()) * -1; }
+
+    /**
+     * Bond notional is the face value in the bond currency.
+     * @return face value wrapped in {@link Money}.
+     */
     @Override public Money notional() {
-        // TODO(TICKET-ADV021): return new Money(faceValue, currency).
-        throw new UnsupportedOperationException("TICKET-ADV021");
+        return new Money(faceValue, currency);
     }
 
+    /**
+     * International Securities Identification Number.
+     * @return ISIN.
+     */
     public String isin()              { return isin; }
-    public BigDecimal faceValue()     { return faceValue; }
-    public BigDecimal couponRate()    { return couponRate; }
-    public LocalDate maturityDate()   { return maturityDate; }
-    public Currency currency()        { return currency; }
-    public Side side()                { return side; }
-    public long counterpartyId()      { return counterpartyId; }
 
+    /**
+     * Bond face value.
+     * @return face value.
+     */
+    public BigDecimal faceValue()     { return faceValue; }
+
+    /**
+     * Coupon rate applied to the bond.
+     * @return coupon rate.
+     */
+    public BigDecimal couponRate()    { return couponRate; }
+
+    /**
+     * Maturity date when the bond principal is due.
+     * @return maturity date.
+     */
+    public LocalDate maturityDate()   { return maturityDate; }
+
+    /**
+     * Currency in which the bond is denominated.
+     * @return bond currency.
+     */
+    public Currency currency()        { return currency; }
+
+    /**
+     * Whether the trade is a buy or sell.
+     * @return trade side.
+     */
+    public Side side()                { return side; }
+
+    /**
+     * Counterparty identifier used for matching and reporting.
+     * @return counterparty id.
+     */
+    public long counterpartyId()      { return counterpartyId; }
+    /**
+ * Equality(between EquityTrades) based solely on tradeRef.
+ */
     @Override public boolean equals(Object o) {
     return (o instanceof BondTrade other) && tradeRef.equals(other.tradeRef);
     }
@@ -87,17 +152,67 @@ public final class BondTrade implements TradeType {
         private Currency currency;
         private Side side;
         private long counterpartyId;
-
+        
+        /**
+ * @param v trade reference
+ * @return this builder
+ */
         public Builder tradeRef(TradeRef v)        { this.tradeRef = v; return this; }
+        /**
+ * @param v ISIN identifier
+ * @return this builder
+ */
         public Builder isin(String v)              { this.isin = v; return this; }
+        /**
+ * @param v face value
+ * @return this builder
+ */
         public Builder faceValue(BigDecimal v)     { this.faceValue = v; return this; }
+        /**
+ * @param v coupon rate
+ * @return this builder
+ */
         public Builder couponRate(BigDecimal v)    { this.couponRate = v; return this; }
+        /**
+ * @param v maturity date
+ * @return this builder
+ */
         public Builder maturityDate(LocalDate v)   { this.maturityDate = v; return this; }
+        /**
+ * @param v currency code
+ * @return this builder
+ */
         public Builder currency(String code)       { this.currency = Currency.getInstance(code); return this; }
+        /**
+ * @param v trade side
+ * @return this builder
+ */
         public Builder side(Side v)                { this.side = v; return this; }
+        /**
+ * @param v trade date
+ * @return this builder
+ */
         public Builder tradeDate(LocalDate v)      { this.tradeDate = v; return this; }
+        /**
+ * @param v counterparty ID
+ * @return this builder
+ */
         public Builder counterpartyId(long v)      { this.counterpartyId = v; return this; }
 
+        /**
+         * Build the immutable {@link BondTrade}, validating required fields.
+         *
+         * @return a fully-constructed, validated {@code BondTrade} — never {@code null}.
+         * @throws NullPointerException if any required field
+         *                              ({@code tradeRef}, {@code isin},
+         *                              {@code faceValue}, {@code couponRate},
+         *                              {@code maturityDate}, {@code currency},
+         *                              {@code side}, {@code tradeDate}) is missing.
+         * @throws IllegalStateException if {@code faceValue} is not positive,
+         *                               if {@code couponRate} is negative, or if
+         *                               {@code maturityDate} is before
+         *                               {@code tradeDate}.
+         */
         public BondTrade build() {
             Objects.requireNonNull(tradeRef, "tradeRef");
             Objects.requireNonNull(isin, "isin");

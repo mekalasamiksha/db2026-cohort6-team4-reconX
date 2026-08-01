@@ -33,10 +33,18 @@ public enum ReconciliationRule {
         this.qtyToleranceAbs = qtyToleranceAbs;
     }
 
+    /**
+     * Price tolerance percentage for this rule.
+     * @return price tolerance as a decimal fraction.
+     */
     public BigDecimal priceTolerancePct() {
         return priceTolerancePct;
     }
 
+    /**
+     * Quantity tolerance in absolute units for this rule.
+     * @return quantity tolerance.
+     */
     public BigDecimal qtyToleranceAbs() {
         return qtyToleranceAbs;
     }
@@ -44,8 +52,11 @@ public enum ReconciliationRule {
     /**
      * Decide whether two prices/quantities are within this rule's tolerance.
      *
-     * @return true if BOTH the price diff (as %) AND the qty diff (as abs)
-     *         are within tolerance.
+     * @param internalPrice internal trade price.
+     * @param internalQty internal trade quantity.
+     * @param externalPrice external trade price.
+     * @param externalQty external trade quantity.
+     * @return true if both the price difference and quantity difference are within tolerance.
      */
     public boolean matches(BigDecimal internalPrice, BigDecimal internalQty,
                            BigDecimal externalPrice, BigDecimal externalQty) {

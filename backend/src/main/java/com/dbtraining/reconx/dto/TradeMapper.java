@@ -6,7 +6,7 @@ import org.mapstruct.*;
 
 /**
  * ============================================================================
- * TICKET-ADV054 — MapStruct mapper: Trade entity <-> DTO
+ * TICKET-ADV054 — MapStruct mapper: Trade entity {@code <->} DTO
  *
  * WHAT:    Generates the entity↔DTO conversion at compile time.
  * HOW:     componentModel="spring" → MapStruct emits a @Component bean named

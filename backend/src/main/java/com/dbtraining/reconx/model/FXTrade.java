@@ -1,5 +1,28 @@
-// Implemented Ticket - ADV020 (FxTrade)
 
+/**
+ * ====================================================================
+ * TICKET-ADV020 — FXTrade model
+ *
+ * WHAT:
+ * Immutable foreign-exchange trade representing a currency pair,
+ * notional, and FX rate.
+ *
+ * HOW:
+ * Built via {@link Builder}. Notional is expressed in the second
+ * currency (ccy2) as {@code notionalCcy1 * fxRate}.
+ *
+ * INVARIANTS:
+ * - ccy1 != ccy2
+ * - fxRate > 0
+ *
+ * EQUALITY:
+ * Equality and hash code are based solely on {@code tradeRef}.
+ *
+ * WHY:
+ * Required for reconciliation between internal and external FX trades,
+ * where both currencies and conversion rates must match.
+ * ====================================================================
+ */
 package com.dbtraining.reconx.model;
 
 import java.math.BigDecimal;
@@ -29,21 +52,83 @@ public final class FXTrade implements TradeType {
         this.counterpartyId = b.counterpartyId;
     }
 
+    /**
+     * Create a new builder for an immutable {@link FXTrade}.
+     * @return fresh builder instance.
+     */
     public static Builder builder() { return new Builder(); }
 
+    /**
+     * Stable natural key for the trade.
+     * @return unique trade reference.
+     */
     @Override public TradeRef tradeRef()     { return tradeRef; }
+
+    /**
+     * Business date when the trade was agreed.
+     * @return trade date.
+     */
     @Override public LocalDate tradeDate()   { return tradeDate; }
+
+    /**
+     * The trade asset class.
+     * @return {@link AssetClass#FX}.
+     */
     @Override public AssetClass assetClass() { return AssetClass.FX; }
+
+    /**
+     * Compute the trade notional in the second currency.
+     * @return notional amount expressed in {@link #ccy2()}.
+     */
     @Override public Money notional()        { return new Money(notionalCcy1.multiply(fxRate), ccy2); }
+
+    /**
+ * Orders trades by trade date descending (newest first).
+ *
+ * @param other the trade to compare against
+ * @return a negative integer, zero, or positive integer as this trade
+ *         is newer than, equal to, or older than the specified trade
+ */
     @Override public int compareTo(TradeType other) { return this.tradeDate().compareTo(other.tradeDate()) * -1; }
 
+    /**
+     * Base currency of the FX pair.
+     * @return first currency.
+     */
     public Currency ccy1()           { return ccy1; }
-    public Currency ccy2()           { return ccy2; }
-    public BigDecimal notionalCcy1() { return notionalCcy1; }
-    public BigDecimal fxRate()       { return fxRate; }
-    public Side side()               { return side; }
-    public long counterpartyId()     { return counterpartyId; }
 
+    /**
+     * Terms currency of the FX pair.
+     * @return second currency.
+     */
+    public Currency ccy2()           { return ccy2; }
+
+    /**
+     * Notional amount in the first currency.
+     * @return notional amount in {@link #ccy1()}.
+     */
+    public BigDecimal notionalCcy1() { return notionalCcy1; }
+
+    /**
+     * Spot FX rate from {@link #ccy1()} to {@link #ccy2()}.
+     * @return FX rate.
+     */
+    public BigDecimal fxRate()       { return fxRate; }
+
+    /**
+     * Whether the trade is a buy or sell.
+     * @return trade side.
+     */
+    public Side side()               { return side; }
+
+    /**
+     * Counterparty identifier used for matching and reporting.
+     * @return counterparty id.
+     */
+    public long counterpartyId()     { return counterpartyId; }
+    /**
+ * Equality(between FXTrades) based solely on tradeRef.
+ */
     @Override public boolean equals(Object o) {
         return (o instanceof FXTrade other) && tradeRef.equals(other.tradeRef);
     }
@@ -56,7 +141,6 @@ public final class FXTrade implements TradeType {
                         notionalCcy1.toPlainString(), ccy1.getCurrencyCode(), fxRate.toPlainString(), side);
         // NOTE: deliberately omit counterpartyId and any settlement-specific PII from logs.
     }
-    }
 
     public static final class Builder {
         private TradeRef tradeRef;
@@ -66,15 +150,60 @@ public final class FXTrade implements TradeType {
         private LocalDate tradeDate;
         private long counterpartyId;
 
+        /**
+ * @param v trade reference
+ * @return this builder
+ */
         public Builder tradeRef(TradeRef v)        { this.tradeRef = v; return this; }
+        
+        /**
+ * @param code first currency
+ * @return this builder
+ */
         public Builder ccy1(String code)           { this.ccy1 = Currency.getInstance(code); return this; }
+        /**
+ * @param code second currency
+ * @return this builder
+ */
         public Builder ccy2(String code)           { this.ccy2 = Currency.getInstance(code); return this; }
+        /**
+ * @param v notional amount in current 1
+ * @return this builder
+ */
         public Builder notionalCcy1(BigDecimal v)  { this.notionalCcy1 = v; return this; }
+        /**
+ * @param v FX rate
+ * @return this builder
+ */
         public Builder fxRate(BigDecimal v)        { this.fxRate = v; return this; }
+        /**
+ * @param v trade side
+ * @return this builder
+ */
         public Builder side(Side v)                { this.side = v; return this; }
+        /**
+ * @param v trade date
+ * @return this builder
+ */
         public Builder tradeDate(LocalDate v)      { this.tradeDate = v; return this; }
+        /**
+ * @param v counterparty ID
+ * @return this builder
+ */
         public Builder counterpartyId(long v)      { this.counterpartyId = v; return this; }
 
+        /**
+         * Build the immutable {@link FXTrade}, validating required fields.
+         *
+         * @return a fully-constructed, validated {@code FXTrade} — never {@code null}.
+         * @throws NullPointerException if any required field
+         *                              ({@code tradeRef}, {@code ccy1},
+         *                              {@code ccy2}, {@code notionalCcy1},
+         *                              {@code fxRate}, {@code side},
+         *                              {@code tradeDate}) is missing.
+         * @throws IllegalStateException if {@code ccy1} and {@code ccy2} are equal
+         *                               or if {@code fxRate} is not strictly positive.
+         */
         public FXTrade build() {
             Objects.requireNonNull(tradeRef,     "tradeRef");
             Objects.requireNonNull(ccy1,         "ccy1");

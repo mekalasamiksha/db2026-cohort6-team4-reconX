@@ -1,5 +1,7 @@
 package com.dbtraining.reconx.domain;
 
+import com.dbtraining.reconx.repository.entity.Counterparty;
+import com.dbtraining.reconx.model.TradeType.AssetClass;
 import jakarta.persistence.*;
 import org.hibernate.envers.Audited;
 import org.springframework.data.annotation.CreatedDate;
@@ -44,9 +46,8 @@ public class Trade {
     @Column(name = "trade_date", nullable = false)
     private LocalDate tradeDate;
 
-    @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
-    private TradeStatus status = TradeStatus.PENDING;
+    private String status = "PENDING";
 
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
