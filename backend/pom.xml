@@ -119,6 +119,12 @@
             <scope>runtime</scope>
         </dependency>
 
+        <dependency>
+            <groupId>com.dbtraining.reconx</groupId>
+            <artifactId>recon-audit-starter</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+
         <!-- Kafka (ADV128-ADV136) -->
         <dependency>
             <groupId>org.springframework.kafka</groupId>
@@ -219,6 +225,15 @@
                             <version>${mapstruct.version}</version>
                         </path>
                     </annotationProcessorPaths>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.11.2</version>
+                <configuration>
+                    <doclint>all,-missing</doclint>
+                    <failOnError>true</failOnError>
                 </configuration>
             </plugin>
             <!-- ADV046 / ADV156 — JaCoCo coverage gate (>=85%) -->
