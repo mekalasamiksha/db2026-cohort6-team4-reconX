@@ -44,6 +44,7 @@ class TradeControllerWebMvcTest {
                 LocalDate.now());
     }
 
+    // TICKET-ADV075 — MockMvc: authenticated create returns 201
     @Test
     @WithMockUser(roles = "TRADER")
     void testCreateTrade_authenticated_returns201() throws Exception {
@@ -77,4 +78,25 @@ class TradeControllerWebMvcTest {
                 .andExpect(jsonPath("$.id").value(42))
                 .andExpect(jsonPath("$.tradeRef").value("TRD-20260315-9999"));
     }
+
+    // TICKET-ADV076 — MockMvc: unauthenticated returns 401
+    @Test
+    void testCreateTrade_unauthenticated_returns401() throws Exception {
+        mockMvc.perform(post("/api/v1/trades")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(validRequest())))
+                .andExpect(status().isUnauthorized());
+    }
+
+    // TICKET-ADV077 — MockMvc: VIEWER returns 403
+    @Test
+    @WithMockUser(roles = "VIEWER")
+    void testCreateTrade_viewerRole_returns403() throws Exception {
+        mockMvc.perform(post("/api/v1/trades")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(validRequest()))
+                        .with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf()))
+                .andExpect(status().isForbidden());
+    }
+    
 }
