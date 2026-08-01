@@ -1,5 +1,6 @@
 package com.dbtraining.reconx.domain;
 
+import com.dbtraining.reconx.model.TradeType.AssetClass;
 import io.hypersistence.utils.hibernate.type.json.JsonBinaryType;
 import jakarta.persistence.*;
 import org.hibernate.annotations.Type;
