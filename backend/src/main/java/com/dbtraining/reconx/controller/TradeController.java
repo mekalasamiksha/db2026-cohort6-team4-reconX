@@ -1,6 +1,7 @@
 package com.dbtraining.reconx.controller;
 
 import com.dbtraining.reconx.dto.PagedResponse;
+import com.dbtraining.reconx.dto.StatusUpdate;
 import com.dbtraining.reconx.dto.TradeMapper;
 import com.dbtraining.reconx.dto.TradeRequest;
 import com.dbtraining.reconx.dto.TradeResponse;
@@ -101,11 +102,16 @@ public ResponseEntity<TradeResponse> create(
     @PatchMapping("/{id}/status")
     @Operation(summary = "Update only the status field")
     public TradeResponse updateStatus(@PathVariable Long id,
-            @RequestBody Map<String, String> body,
-            @AuthenticationPrincipal Object principal) {
-        // TODO(TICKET-ADV066): read body.get("status") and call
-        // service.updateStatus(id, status, actor). Return mapper.toResponse(saved).
-        throw new UnsupportedOperationException("TICKET-ADV066");
+        @Valid @RequestBody Map<String, String> body,
+        @Valid @RequestBody StatusUpdate request,
+         @AuthenticationPrincipal Object principal) {
+        return mapper.toResponse(
+            service.updateStatus(
+                    id,
+                    request.status(),
+                    String.valueOf(principal)
+            )
+    );
     }
 
     @DeleteMapping("/{id}")
