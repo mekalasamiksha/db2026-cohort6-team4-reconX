@@ -108,10 +108,55 @@ public class TradeService {
     return saved;
 }
     public Trade update(Long id, TradeRequest req, String actor) {
-        // TODO(TICKET-ADV065): load by id (throw TradeNotFoundException if missing),
-        //   copy mutable fields from req, save, publish a TRADE_UPDATED event.
-        throw new UnsupportedOperationException("TICKET-ADV065");
-    }
+
+    // Load existing trade or return 404
+    Trade trade = tradeRepo.findById(id)
+            .orElseThrow(() -> new TradeNotFoundException(String.valueOf(id)));
+
+    // Prevent duplicate trade reference
+    tradeRepo.findByTradeRef(req.tradeRef())
+            .filter(t -> !t.getId().equals(id))
+            .ifPresent(t -> {
+                throw new DuplicateTradeRefException(req.tradeRef());
+            });
+
+    // Load referenced entities
+    var instrument = instRepo.findById(req.instrumentId())
+            .orElseThrow(() ->
+                    new IllegalArgumentException("Instrument not found"));
+
+    var counterparty = cpRepo.findById(req.counterpartyId())
+            .orElseThrow(() ->
+                    new IllegalArgumentException("Counterparty not found"));
+
+    // Replace every mutable field
+    trade.setTradeRef(req.tradeRef());
+    trade.setInstrument(instrument);
+    trade.setCounterparty(counterparty);
+    trade.setAssetClass(req.assetClass());
+    trade.setSide(req.side());
+    trade.setQuantity(req.quantity());
+    trade.setPrice(req.price());
+    trade.setTradeDate(req.tradeDate());
+
+    /*
+    // Uncomment when ADV129 is implemented
+    events.publish(
+            new TradeEvent(
+                    UUID.randomUUID(),
+                    trade.getTradeRef(),
+                    TradeEvent.EventType.TRADE_UPDATED,
+                    Instant.now(),
+                    actor,
+                    null,
+                    trade.getStatus()
+            )
+    );
+    */
+
+    return trade;
+}
+    
 
     public Trade updateStatus(Long id, String status, String actor) {
         // TODO(TICKET-ADV066): load, setStatus(status), save, publish TRADE_UPDATED
