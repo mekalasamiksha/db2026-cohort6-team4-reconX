@@ -19,6 +19,9 @@ import java.util.Objects;
  *          fail at the type level: {@code plus()} throws if currencies differ.
  * OBSERVE: {@code Money.of("100.00","USD").plus(Money.of("50","EUR"))} throws.
  *          {@code Money.of("100","USD").plus(Money.of("50","USD"))} returns 150 USD.
+ *
+ * @param amount   non-negative monetary amount.
+ * @param currency currency of the amount.
  * ============================================================================
  */
 public record Money(BigDecimal amount, Currency currency) {
@@ -31,23 +34,54 @@ public record Money(BigDecimal amount, Currency currency) {
         }
     }
 
+    /**
+     * Create a {@link Money} instance from a numeric string and currency code.
+     *
+     * @param amount       decimal amount string.
+     * @param currencyCode ISO currency code.
+     * @return new Money instance.
+     */
     public static Money of(String amount, String currencyCode) {
         return new Money(new BigDecimal(amount), Currency.getInstance(currencyCode));
     }
 
+    /**
+     * Create a {@link Money} instance from a decimal amount and currency code.
+     *
+     * @param amount       decimal amount.
+     * @param currencyCode ISO currency code.
+     * @return new Money instance.
+     */
     public static Money of(BigDecimal amount, String currencyCode) {
         return new Money(amount, Currency.getInstance(currencyCode));
     }
 
-    /** Add another Money of the same currency. Throws on currency mismatch. */
+    /**
+     * Add another Money of the same currency.
+     *
+     * @param other money to add.
+     * @return new Money whose amount is the sum of both values.
+     * @throws NullPointerException if {@code other} is null.
+     * @throws IllegalArgumentException if the currencies differ.
+     */
     public Money plus(Money other) {
-        // TODO(TICKET-ADV024): validate same currency, then return a new Money
+        // Validates same currency before addition, return a new Money
         //                     whose amount = this.amount + other.amount.
-        throw new UnsupportedOperationException("TICKET-ADV024");
+        if (!this.currency.equals(other.currency)) {
+            throw new IllegalArgumentException(
+                    "Cannot add %s to %s — currency mismatch".formatted(other.currency, this.currency));
+        }
+        return new Money(this.amount.add(other.amount), this.currency);
     }
 
+    /**
+ * Multiply this money amount by a scalar.
+ *
+ * @param multiplier factor to scale the amount.
+ * @return a new Money with the scaled amount.
+ * @throws NullPointerException if {@code multiplier} is null.
+ */
     public Money times(BigDecimal multiplier) {
-        // TODO(TICKET-ADV024): return a new Money whose amount = this.amount * multiplier.
-        throw new UnsupportedOperationException("TICKET-ADV024");
+        return new Money(this.amount.multiply(multiplier), this.currency);
     }
 }

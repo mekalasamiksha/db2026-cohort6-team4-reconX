@@ -22,6 +22,12 @@ public class GlobalExceptionHandler {
 
     
     @ExceptionHandler(TradeNotFoundException.class)
+    /**
+     * Handle {@link TradeNotFoundException} and translate it into a ProblemDetail.
+     *
+     * @param ex thrown when the requested trade cannot be found.
+     * @return RFC 7807 ProblemDetail describing the missing trade.
+     */
     public ProblemDetail notFound(TradeNotFoundException ex) {
         return ProblemDetail.forStatusAndDetail(
                 HttpStatus.NOT_FOUND,
@@ -30,6 +36,12 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(DuplicateTradeRefException.class)
+    /**
+     * Handle {@link DuplicateTradeRefException} and translate it into a ProblemDetail.
+     *
+     * @param ex thrown when a tradeRef already exists.
+     * @return RFC 7807 ProblemDetail describing the conflict.
+     */
     public ProblemDetail duplicate(DuplicateTradeRefException ex) {
         return ProblemDetail.forStatusAndDetail(
                 HttpStatus.CONFLICT,
@@ -38,6 +50,12 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(InvalidTradeException.class)
+    /**
+     * Handle {@link InvalidTradeException} and translate it into a ProblemDetail.
+     *
+     * @param ex thrown when a trade payload fails business validation.
+     * @return RFC 7807 ProblemDetail describing the invalid payload.
+     */
     public ProblemDetail invalid(InvalidTradeException ex) {
         return ProblemDetail.forStatusAndDetail(
                 HttpStatus.BAD_REQUEST,
@@ -46,6 +64,12 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(ReconciliationMismatchException.class)
+    /**
+     * Handle {@link ReconciliationMismatchException} and translate it into a ProblemDetail.
+     *
+     * @param ex thrown when internal and external trades do not reconcile.
+     * @return RFC 7807 ProblemDetail describing the mismatch.
+     */
     public ProblemDetail mismatch(ReconciliationMismatchException ex) {
         return ProblemDetail.forStatusAndDetail(
                 HttpStatus.UNPROCESSABLE_ENTITY,
@@ -54,6 +78,12 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
+    /**
+     * Handle {@link MethodArgumentNotValidException} raised by invalid controller input.
+     *
+     * @param ex validation exception from Spring MVC binding.
+     * @return RFC 7807 ProblemDetail describing the field-level errors.
+     */
     public ProblemDetail validation(MethodArgumentNotValidException ex) {
 
         String errors = ex.getBindingResult()
@@ -69,6 +99,12 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
+    /**
+     * Handle {@link ConstraintViolationException} raised by bean validation.
+     *
+     * @param ex constraint violation exception.
+     * @return RFC 7807 ProblemDetail describing the constraint violations.
+     */
     public ProblemDetail constraint(ConstraintViolationException ex) {
         return ProblemDetail.forStatusAndDetail(
                 HttpStatus.BAD_REQUEST,
