@@ -18,20 +18,15 @@ import org.springframework.stereotype.Component;
  * OBSERVE: Publish a string to `system-alerts` via Kafdrop -> a WARN line
  *          appears in the app log.
  * ============================================================================
- *
- *  TODO(TICKET-ADV133):
- *    @KafkaListener(topics = "system-alerts", groupId = "alert-service")
- *    public void onAlert(String payload) {
- *        log.warn("ALERT: {}", payload);
- *    }
- * ============================================================================
- */
+
+/** AlertConsumer: log + (in real prod) notify Slack/Pager. */
 @Component
 public class AlertConsumer {
 
     private static final Logger log = LoggerFactory.getLogger(AlertConsumer.class);
 
+    @KafkaListener(topics = "system-alerts", groupId = "alert-service")
     public void onAlert(String payload) {
-        throw new UnsupportedOperationException("TICKET-ADV133");
+        log.warn("ALERT: {}", payload);
     }
 }
