@@ -62,7 +62,6 @@ public final class BondTrade implements TradeType {
      * @return {@link AssetClass#BOND}.
      */
     @Override public AssetClass assetClass() { return AssetClass.BOND; }
-    @Override public int compareTo(TradeType other) { return this.tradeDate().compareTo(other.tradeDate()) * -1; }
 
     /**
  * Orders trades by trade date descending (newest first).
