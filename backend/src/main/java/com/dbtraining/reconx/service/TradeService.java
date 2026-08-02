@@ -186,11 +186,31 @@ public Trade updateStatus(Long id, String status, String actor) {
     return tradeRepo.save(trade);
 }
 
-    public void softDelete(Long id, String actor) {
-        // TODO(TICKET-ADV067): load, call t.softDelete() (sets deleted_at), save,
-        //   publish a TRADE_CANCELLED event.
-        throw new UnsupportedOperationException("TICKET-ADV067");
-    }
+    @Transactional
+public void softDelete(Long id, String actor) {
+
+    Trade trade = tradeRepo.findById(id)
+            .orElseThrow(() ->
+                    new TradeNotFoundException("id=" + id));
+
+    trade.softDelete();
+
+    // Optional because Hibernate dirty-checking will persist the change.
+    // Keeping save() is also perfectly fine.
+    tradeRepo.save(trade);
+
+    events.publish(
+            new TradeEvent(
+                    UUID.randomUUID(),
+                    trade.getTradeRef(),
+                    TradeEvent.EventType.TRADE_CANCELLED,
+                    Instant.now(),
+                    actor,
+                    null,
+                    null
+            )
+    );
+}
 
     @Transactional(readOnly = true)
 public Page<Trade> list(
