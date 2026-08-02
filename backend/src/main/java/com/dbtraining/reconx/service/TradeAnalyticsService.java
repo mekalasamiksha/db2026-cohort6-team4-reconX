@@ -100,6 +100,15 @@ public class TradeAnalyticsService {
             : abs.negate();
 }
 
+   private BigDecimal pnl(EquityTrade t) {
+
+    BigDecimal abs = t.price().multiply(t.quantity());
+
+    return t.side() == com.dbtraining.reconx.model.Side.SELL
+            ? abs
+            : abs.negate();
+}
+
 
     // Raising a PR under Ticket34 as Ticket18 PR is already done
     // Following student guides to do so
@@ -127,5 +136,6 @@ public class TradeAnalyticsService {
                 .collect(new VwapCollector());
     }
 
+    
 
 }

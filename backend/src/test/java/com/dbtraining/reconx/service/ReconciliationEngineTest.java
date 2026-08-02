@@ -1,6 +1,8 @@
 package com.dbtraining.reconx.service;
 import com.dbtraining.reconx.repository.ReconResultRepository;
 import com.dbtraining.reconx.repository.entity.Trade;
+import com.dbtraining.reconx.model.TradeType;
+import com.dbtraining.reconx.model.ReconciliationRule;
 
 import org.mockito.ArgumentCaptor;
 import com.dbtraining.reconx.model.EquityTrade;
