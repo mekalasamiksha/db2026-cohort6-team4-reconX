@@ -82,30 +82,32 @@ public class TradeService {
 
     Trade saved = tradeRepo.save(trade);
 
-    // These belong to later tickets.
-    // Uncomment once ADV083 and ADV129 are implemented.
+   // TICKET-ADV083
+metrics.incrementTradeCreated();
 
-    /*
-    metrics.incrementTradeCreated();
+// TICKET-ADV086
+metrics.recordTradeValue(
+        req.quantity()
+           .multiply(req.price())
+           .doubleValue());
 
-    metrics.recordTradeValue(
-            req.quantity()
-               .multiply(req.price())
-               .doubleValue());
+/*
+ * Leave this commented until you implement TICKET-ADV129.
+ */
+/*
+events.publish(
+        new TradeEvent(
+                UUID.randomUUID(),
+                saved.getTradeRef(),
+                TradeEvent.EventType.TRADE_CREATED,
+                Instant.now(),
+                actor,
+                null,
+                saved.getStatus()
+        ));
+*/
 
-    events.publish(
-            new TradeEvent(
-                    UUID.randomUUID(),
-                    saved.getTradeRef(),
-                    TradeEvent.EventType.TRADE_CREATED,
-                    Instant.now(),
-                    actor,
-                    null,
-                    saved.getStatus()
-            ));
-    */
-
-    return saved;
+return saved;
 }
     public Trade update(Long id, TradeRequest req, String actor) {
 

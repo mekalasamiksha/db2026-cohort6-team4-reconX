@@ -22,6 +22,12 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.http.MediaType;
+import jakarta.servlet.http.HttpServletResponse;
 import java.net.URI;
 import java.time.LocalDate;
 import java.util.List;
@@ -75,6 +81,16 @@ public class TradeController {
         return PagedResponse.from(page, mapper::toResponse);
     }
 
+    @PostMapping
+    @Operation(summary = "Create a trade")
+    public ResponseEntity<TradeResponse> create(@Valid @RequestBody TradeRequest req,
+            @AuthenticationPrincipal Object principal) {
+        // TODO(TICKET-ADV064): call service.create(req, actor), build a Location
+        // header at /api/v1/trades/{id}, and return 201 Created with the
+        // mapped TradeResponse body.
+        throw new UnsupportedOperationException("TICKET-ADV064");
+    }
+
    @PostMapping
 @Operation(summary = "Create a trade")
 public ResponseEntity<TradeResponse> create(
@@ -123,5 +139,14 @@ public ResponseEntity<TradeResponse> create(
         service.softDelete(id, String.valueOf(principal));
 
     return ResponseEntity.noContent().build();
+    }
+    @Deprecated(since = "v1.4.0", forRemoval = true)
+    @GetMapping(value = "/old-search", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Void> oldSearch(HttpServletResponse response) {
+        response.setHeader("Deprecation", "true");
+        response.setHeader("Sunset", "Sat, 1 Jul 2026 00:00:00 GMT");
+        response.setHeader("Link",
+                "</api/v1/trades?status=...>; rel=\"successor-version\"");
+        return ResponseEntity.status(HttpStatus.GONE).build();
     }
 }

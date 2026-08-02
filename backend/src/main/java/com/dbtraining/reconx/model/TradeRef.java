@@ -15,8 +15,11 @@ import java.util.regex.Pattern;
  *          String — counterparty name, instrument symbol. TradeRef as a
  *          distinct type makes those mix-ups a compile error.
  * OBSERVE: TradeRef.of("EQU-20260602-0001") works; .of("foo") throws.
+ *
+ * @param value trade reference string in AAA-YYYYMMDD-NNNN format.
  * ============================================================================
  */
+
 public record TradeRef(String value) {
 
     private static final Pattern PATTERN = Pattern.compile("^[A-Z]{3}-\\d{8}-\\d{4}$");
@@ -29,10 +32,20 @@ public record TradeRef(String value) {
         }
     }
 
+    /**
+     * Create a typed {@link TradeRef} from a string.
+     *
+     * @param value trade reference string in AAA-YYYYMMDD-NNNN format.
+     * @return new TradeRef.
+     */
     public static TradeRef of(String value) {
         return new TradeRef(value);
     }
 
+    /**
+     * Render the trade reference as its underlying string.
+     * @return trade reference string.
+     */
     @Override
     public String toString() {
         return value;

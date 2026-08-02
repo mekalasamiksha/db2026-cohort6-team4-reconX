@@ -1,6 +1,7 @@
 package com.dbtraining.reconx.model;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 /**
  * ============================================================================
@@ -29,25 +30,62 @@ public enum ReconciliationRule {
 
     ReconciliationRule(BigDecimal priceTolerancePct, BigDecimal qtyToleranceAbs) {
         this.priceTolerancePct = priceTolerancePct;
-        this.qtyToleranceAbs   = qtyToleranceAbs;
+        this.qtyToleranceAbs = qtyToleranceAbs;
     }
 
-    public BigDecimal priceTolerancePct() { return priceTolerancePct; }
-    public BigDecimal qtyToleranceAbs()   { return qtyToleranceAbs; }
+    /**
+     * Price tolerance percentage for this rule.
+     * @return price tolerance as a decimal fraction.
+     */
+    public BigDecimal priceTolerancePct() {
+        return priceTolerancePct;
+    }
+
+    /**
+     * Quantity tolerance in absolute units for this rule.
+     * @return quantity tolerance.
+     */
+    public BigDecimal qtyToleranceAbs() {
+        return qtyToleranceAbs;
+    }
 
     /**
      * Decide whether two prices/quantities are within this rule's tolerance.
-     * @return true if BOTH the price diff (as %) AND the qty diff (as abs)
-     *         are within tolerance.
+     *
+     * @param internalPrice internal trade price.
+     * @param internalQty internal trade quantity.
+     * @param externalPrice external trade price.
+     * @param externalQty external trade quantity.
+     * @return true if both the price difference and quantity difference are within tolerance.
      */
     public boolean matches(BigDecimal internalPrice, BigDecimal internalQty,
                            BigDecimal externalPrice, BigDecimal externalQty) {
-        // TODO(TICKET-ADV026):
-        //   1. Compute |internalPrice - externalPrice| as priceDiff.
-        //   2. priceDiffPct = priceDiff / internalPrice (guard divide-by-zero).
-        //   3. qtyDiff = |internalQty - externalQty|.
-        //   4. Return true iff priceDiffPct <= priceTolerancePct AND
-        //      qtyDiff <= qtyToleranceAbs.
-        throw new UnsupportedOperationException("TICKET-ADV026");
+
+        // Absolute price difference
+        BigDecimal priceDiff = internalPrice.subtract(externalPrice).abs();
+
+        // Calculate percentage difference (guard against divide by zero)
+        BigDecimal priceDiffPct;
+
+        if (internalPrice.compareTo(BigDecimal.ZERO) == 0) {
+            if (priceDiff.compareTo(BigDecimal.ZERO) == 0) {
+                priceDiffPct = BigDecimal.ZERO;
+            } else {
+                return false;
+            }
+        } else {
+            priceDiffPct = priceDiff.divide(
+                    internalPrice,
+                    6,
+                    RoundingMode.HALF_UP
+            );
+        }
+
+        // Absolute quantity difference
+        BigDecimal qtyDiff = internalQty.subtract(externalQty).abs();
+
+        // Check both tolerances
+        return priceDiffPct.compareTo(priceTolerancePct) <= 0
+                && qtyDiff.compareTo(qtyToleranceAbs) <= 0;
     }
 }

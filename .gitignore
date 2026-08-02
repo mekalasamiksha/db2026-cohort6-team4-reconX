@@ -1,0 +1,5 @@
+# Java / Maven build output
+backend/target/
+
+# macOS filesystem noise
+**/.DS_Store
