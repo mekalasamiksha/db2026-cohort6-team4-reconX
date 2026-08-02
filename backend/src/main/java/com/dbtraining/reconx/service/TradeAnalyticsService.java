@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
  * ============================================================================
  * TICKET-ADV034 — Trade analytics with Collectors (groupingBy + summarizing)
  * TICKET-ADV035 — VWAP calculator using Streams + custom collector
- * TICKET-ADV036 — P&L per instrument: stream reduction
+ * TICKET-ADV036 — P{@code &}L per instrument: stream reduction
  * ============================================================================
  */
 @Service
@@ -23,11 +23,20 @@ public class TradeAnalyticsService {
     /** TICKET-ADV034 — count + sum of notional per counterparty. */
     public Map<Long, NotionalSummary> notionalByCounterparty(List<? extends TradeType> trades) {
         // TODO(TICKET-ADV034): Collectors.groupingBy(this::counterpartyIdOf,
-        // Collectors.collectingAndThen(toList(), list -> new NotionalSummary(
-        // list.size(),
-        // list.stream().map(t -> t.notional().amount()).reduce(ZERO,
-        // BigDecimal::add)))).
-        throw new UnsupportedOperationException("TICKET-ADV034");
+        //   Collectors.collectingAndThen(toList(), list -> new NotionalSummary(
+        //       list.size(),
+        //       list.stream().map(t -> t.notional().amount()).reduce(ZERO, BigDecimal::add)))).
+        return trades.stream().collect(Collectors.groupingBy(
+                t -> counterpartyIdOf(t),
+                Collectors.collectingAndThen(
+                        Collectors.toList(),
+                        list -> new NotionalSummary(
+                                list.size(),
+                                list.stream()
+                                        .map(t -> t.notional().amount())
+                                        .reduce(BigDecimal.ZERO, BigDecimal::add))
+                )));
+        //throw new UnsupportedOperationException("TICKET-ADV034");
     }
 
     /**
@@ -64,8 +73,11 @@ public class TradeAnalyticsService {
                     }
             ));
 }
+    }
 
-    /** TICKET-ADV036 — P&L per instrument symbol (sign by Side). */
+    /**
+     * TICKET-ADV036 — P{@code &}L per instrument symbol (sign by Side).
+     */
     public Map<String, BigDecimal> pnlByInstrument(List<EquityTrade> equityTrades) {
 
     return equityTrades.stream().collect(Collectors.groupingBy(
@@ -89,6 +101,18 @@ public class TradeAnalyticsService {
             : abs.negate();
 }
 
+   private BigDecimal pnl(EquityTrade t) {
+
+    BigDecimal abs = t.price().multiply(t.quantity());
+
+    return t.side() == com.dbtraining.reconx.model.Side.SELL
+            ? abs
+            : abs.negate();
+}
+
+
+    // Raising a PR under Ticket34 as Ticket18 PR is already done
+    // Following student guides to do so
     private long counterpartyIdOf(TradeType t) {
         // TODO(TICKET-ADV018): exhaustive switch over the sealed TradeType
         // hierarchy returning t.counterpartyId() for each concrete subtype.
@@ -97,6 +121,17 @@ public class TradeAnalyticsService {
 
     public record NotionalSummary(long count, BigDecimal total) {
     }
+        //   hierarchy returning t.counterpartyId() for each concrete subtype.
+        return switch (t) {
+            case EquityTrade e                                 -> e.counterpartyId();
+            case com.dbtraining.reconx.model.FXTrade fx        -> fx.counterpartyId();
+            case com.dbtraining.reconx.model.BondTrade b       -> b.counterpartyId();
+            case com.dbtraining.reconx.model.DerivativeTrade d -> d.counterpartyId();
+        };
+        //throw new UnsupportedOperationException("TICKET-ADV018");
+    }
+
+    public record NotionalSummary(long count, BigDecimal total) {}
 
     public BigDecimal calculateVwap(List<EquityTrade> trades) {
         return trades.stream()
@@ -109,4 +144,5 @@ public class TradeAnalyticsService {
     }
 
     
+
 }
