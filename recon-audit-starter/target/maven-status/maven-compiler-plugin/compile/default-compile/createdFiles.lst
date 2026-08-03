@@ -1,0 +1,3 @@
+com\dbtraining\reconx\audit\AuditAutoConfiguration.class
+com\dbtraining\reconx\audit\AuditProperties.class
+com\dbtraining\reconx\audit\AuditEventPublisher.class
