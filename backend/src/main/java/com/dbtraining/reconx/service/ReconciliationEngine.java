@@ -10,8 +10,10 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executors;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.concurrent.ExecutorService;
 
 /**
  * ============================================================================
@@ -31,26 +33,42 @@ import java.util.stream.Collectors;
  *          reconciliation_duration_seconds.
  * ============================================================================
  */
+
 @Service
 public class ReconciliationEngine {
+
+    private final ExecutorService executor =
+            Executors.newFixedThreadPool(
+    Runtime.getRuntime().availableProcessors(),
+    r -> new Thread(r, "recon-worker-" + r.hashCode())
+);
 
     @Timed(value = "reconciliation.duration", description = "Wall time of reconcile()",
            percentiles = {0.5, 0.95, 0.99}, histogram = true)
     public List<ReconResult> reconcile(List<TradeType> internal,
-                                       List<TradeType> external,
-                                       ReconciliationRule rule) {
-        if (internal == null || internal.isEmpty()) {
-            return List.of();
-        }
+                                  List<TradeType> external,
+                                  ReconciliationRule rule) {
 
-        Map<String, TradeType> externalByRef = (external == null ? List.<TradeType>of() : external)
-                .stream()
-                .collect(Collectors.toMap(t -> t.tradeRef().value(), Function.identity(), (a, b) -> a));
-
-        return internal.parallelStream()
-                .map(in -> matchOne(in, externalByRef.get(in.tradeRef().value()), rule))
-                .toList();
+    if (internal == null || internal.isEmpty()) {
+        return List.of();
     }
+
+    Map<String, TradeType> externalByRef = (external == null ? List.<TradeType>of() : external)
+            .stream()
+            .collect(Collectors.toMap(
+                    t -> t.tradeRef().value(),
+                    Function.identity(),
+                    (a, b) -> a
+            ));
+
+    return internal.parallelStream()
+            .map(in -> matchOne(
+                    in,
+                    externalByRef.get(in.tradeRef().value()),
+                    rule
+            ))
+            .toList();
+}
 
     /**
      * TICKET-ADV037 — split by counterparty, reconcile each batch concurrently,
@@ -62,19 +80,28 @@ public class ReconciliationEngine {
         Map<Long, List<TradeType>> externalByCp,
         ReconciliationRule rule) {
 
-    List<CompletableFuture<List<ReconResult>>> futures = internalByCp.entrySet().stream()
-            .map(entry -> {
-                Long cpId = entry.getKey();
-                List<TradeType> internalTrades = entry.getValue();
-                List<TradeType> externalTrades = externalByCp.getOrDefault(cpId, List.of());
-                return CompletableFuture.supplyAsync(() -> reconcile(internalTrades, externalTrades, rule));
-            })
-            .toList();
+    if (internalByCp == null || internalByCp.isEmpty()) {
+        return CompletableFuture.completedFuture(List.of());
+    }
+
+    List<CompletableFuture<List<ReconResult>>> futures =
+            internalByCp.entrySet().stream()
+                    .map(entry -> CompletableFuture.supplyAsync(() ->
+                                    reconcile(
+                                            entry.getValue(),
+                                            externalByCp.getOrDefault(entry.getKey(), List.of()),
+                                            rule
+                                    ),
+                            executor
+                    ))
+                    .toList();
 
     return CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
-            .thenApply(v -> futures.stream()
-                    .flatMap(f -> f.join().stream())
-                    .toList());
+            .thenApply(v ->
+                    futures.stream()
+                            .flatMap(f -> f.join().stream())
+                            .toList()
+            );
 }
 
     private ReconResult matchOne(TradeType internal, TradeType external, ReconciliationRule rule) {
@@ -104,4 +131,8 @@ public class ReconciliationEngine {
             case com.dbtraining.reconx.model.DerivativeTrade d -> new BigDecimal[]{d.strike(), d.quantity()};
         };
     }
+    public void shutdown() {
+    executor.shutdown();
+}
+
 }
