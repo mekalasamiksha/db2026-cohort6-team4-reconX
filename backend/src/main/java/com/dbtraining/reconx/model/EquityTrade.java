@@ -228,5 +228,11 @@ public final class EquityTrade implements TradeType {
             if (price.signum() <= 0)    throw new IllegalStateException("price must be > 0");
             return new EquityTrade(this);
         }
+        @Override
+        public boolean equals(Object o) {
+            return (o instanceof EquityTrade other) && tradeRef.equals(other.tradeRef);
+        }
+
+        @Override public int hashCode() { return tradeRef.hashCode(); }
     }
 }

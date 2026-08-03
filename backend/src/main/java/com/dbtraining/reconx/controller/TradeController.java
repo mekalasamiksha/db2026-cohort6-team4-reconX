@@ -143,4 +143,13 @@ public class TradeController {
                 "</api/v1/trades?status=...>; rel=\"successor-version\"");
         return ResponseEntity.status(HttpStatus.GONE).build();
     }
+    @Deprecated(since = "v1.4.0", forRemoval = true)
+    @GetMapping(value = "/old-search", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Void> oldSearch(HttpServletResponse response) {
+        response.setHeader("Deprecation", "true");
+        response.setHeader("Sunset", "Sat, 1 Jul 2026 00:00:00 GMT");
+        response.setHeader("Link",
+                "</api/v1/trades?status=...>; rel=\"successor-version\"");
+        return ResponseEntity.status(HttpStatus.GONE).build();
+    }
 }
