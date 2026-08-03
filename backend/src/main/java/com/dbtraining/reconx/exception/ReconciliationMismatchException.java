@@ -16,11 +16,26 @@ public class ReconciliationMismatchException extends ReconException {
      * Create the exception for a reconciliation mismatch.
      * @param message mismatch description.
      */
+    private final Long reconBreakId;
+
     public ReconciliationMismatchException(String message) {
-        super(message);
+        this(message, null, null);
+    }
+
+    public ReconciliationMismatchException(String message, Long reconBreakId) {
+        this(message, reconBreakId, null);
     }
 
     public ReconciliationMismatchException(String message, Throwable cause) {
+        this(message, null, cause);
+    }
+
+    public ReconciliationMismatchException(String message, Long reconBreakId, Throwable cause) {
         super(message, cause);
+        this.reconBreakId = reconBreakId;
+    }
+
+    public Long getReconBreakId() {
+        return reconBreakId;
     }
 }

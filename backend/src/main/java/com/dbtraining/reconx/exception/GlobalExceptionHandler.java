@@ -1,12 +1,18 @@
 package com.dbtraining.reconx.exception;
 
 import jakarta.validation.ConstraintViolationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.net.URI;
+import java.time.Instant;
 import java.util.stream.Collectors;
 
 /**
@@ -20,95 +26,113 @@ import java.util.stream.Collectors;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    
+    private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
     @ExceptionHandler(TradeNotFoundException.class)
-    /**
-     * Handle {@link TradeNotFoundException} and translate it into a ProblemDetail.
-     *
-     * @param ex thrown when the requested trade cannot be found.
-     * @return RFC 7807 ProblemDetail describing the missing trade.
-     */
-    public ProblemDetail notFound(TradeNotFoundException ex) {
-        return ProblemDetail.forStatusAndDetail(
+    public ResponseEntity<ProblemDetail> notFound(TradeNotFoundException ex) {
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(
                 HttpStatus.NOT_FOUND,
                 ex.getMessage()
         );
+        problem.setType(URI.create("/trade-not-found"));
+        problem.setTitle("Trade not found");
+        problem.setProperty("timestamp", Instant.now().toString());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .contentType(MediaType.APPLICATION_PROBLEM_JSON)
+                .body(problem);
     }
 
     @ExceptionHandler(DuplicateTradeRefException.class)
-    /**
-     * Handle {@link DuplicateTradeRefException} and translate it into a ProblemDetail.
-     *
-     * @param ex thrown when a tradeRef already exists.
-     * @return RFC 7807 ProblemDetail describing the conflict.
-     */
-    public ProblemDetail duplicate(DuplicateTradeRefException ex) {
-        return ProblemDetail.forStatusAndDetail(
+    public ResponseEntity<ProblemDetail> duplicate(DuplicateTradeRefException ex) {
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(
                 HttpStatus.CONFLICT,
                 ex.getMessage()
         );
+        problem.setType(URI.create("/duplicate-trade-ref"));
+        problem.setTitle("Duplicate trade reference");
+        problem.setProperty("timestamp", Instant.now().toString());
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .contentType(MediaType.APPLICATION_PROBLEM_JSON)
+                .body(problem);
     }
 
     @ExceptionHandler(InvalidTradeException.class)
-    /**
-     * Handle {@link InvalidTradeException} and translate it into a ProblemDetail.
-     *
-     * @param ex thrown when a trade payload fails business validation.
-     * @return RFC 7807 ProblemDetail describing the invalid payload.
-     */
-    public ProblemDetail invalid(InvalidTradeException ex) {
-        return ProblemDetail.forStatusAndDetail(
+    public ResponseEntity<ProblemDetail> invalid(InvalidTradeException ex) {
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(
                 HttpStatus.BAD_REQUEST,
                 ex.getMessage()
         );
+        problem.setType(URI.create("/invalid-trade"));
+        problem.setTitle("Invalid trade");
+        problem.setProperty("timestamp", Instant.now().toString());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .contentType(MediaType.APPLICATION_PROBLEM_JSON)
+                .body(problem);
     }
 
     @ExceptionHandler(ReconciliationMismatchException.class)
-    /**
-     * Handle {@link ReconciliationMismatchException} and translate it into a ProblemDetail.
-     *
-     * @param ex thrown when internal and external trades do not reconcile.
-     * @return RFC 7807 ProblemDetail describing the mismatch.
-     */
-    public ProblemDetail mismatch(ReconciliationMismatchException ex) {
-        return ProblemDetail.forStatusAndDetail(
+    public ResponseEntity<ProblemDetail> mismatch(ReconciliationMismatchException ex) {
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(
                 HttpStatus.UNPROCESSABLE_ENTITY,
                 ex.getMessage()
         );
+        problem.setType(URI.create("/recon-failure"));
+        problem.setTitle("Reconciliation failure");
+        problem.setProperty("timestamp", Instant.now().toString());
+        if (ex.getReconBreakId() != null) {
+            problem.setProperty("reconBreakId", ex.getReconBreakId());
+        }
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
+                .contentType(MediaType.APPLICATION_PROBLEM_JSON)
+                .body(problem);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    /**
-     * Handle {@link MethodArgumentNotValidException} raised by invalid controller input.
-     *
-     * @param ex validation exception from Spring MVC binding.
-     * @return RFC 7807 ProblemDetail describing the field-level errors.
-     */
-    public ProblemDetail validation(MethodArgumentNotValidException ex) {
-
+    public ResponseEntity<ProblemDetail> validation(MethodArgumentNotValidException ex) {
         String errors = ex.getBindingResult()
                 .getFieldErrors()
                 .stream()
                 .map(error -> error.getField() + ": " + error.getDefaultMessage())
                 .collect(Collectors.joining("; "));
 
-        return ProblemDetail.forStatusAndDetail(
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(
                 HttpStatus.BAD_REQUEST,
                 errors
         );
+        problem.setType(URI.create("/validation-failed"));
+        problem.setTitle("Validation failed");
+        problem.setProperty("timestamp", Instant.now().toString());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .contentType(MediaType.APPLICATION_PROBLEM_JSON)
+                .body(problem);
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
-    /**
-     * Handle {@link ConstraintViolationException} raised by bean validation.
-     *
-     * @param ex constraint violation exception.
-     * @return RFC 7807 ProblemDetail describing the constraint violations.
-     */
-    public ProblemDetail constraint(ConstraintViolationException ex) {
-        return ProblemDetail.forStatusAndDetail(
+    public ResponseEntity<ProblemDetail> constraint(ConstraintViolationException ex) {
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(
                 HttpStatus.BAD_REQUEST,
                 ex.getMessage()
         );
+        problem.setType(URI.create("/validation-failed"));
+        problem.setTitle("Validation failed");
+        problem.setProperty("timestamp", Instant.now().toString());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .contentType(MediaType.APPLICATION_PROBLEM_JSON)
+                .body(problem);
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ProblemDetail> generic(Exception ex) {
+        log.error("Unhandled exception caught by global handler", ex);
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                "An unexpected error occurred. Please contact support."
+        );
+        problem.setType(URI.create("/internal-server-error"));
+        problem.setTitle("Internal server error");
+        problem.setProperty("timestamp", Instant.now().toString());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .contentType(MediaType.APPLICATION_PROBLEM_JSON)
+                .body(problem);
     }
 }
