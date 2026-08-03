@@ -2,6 +2,7 @@ package com.dbtraining.reconx.controller;
 
 import com.dbtraining.reconx.dto.TradeRequest;
 import com.dbtraining.reconx.dto.TradeResponse;
+import com.dbtraining.reconx.repository.entity.Trade;
 import com.dbtraining.reconx.service.TradeService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
@@ -18,6 +19,7 @@ import java.time.LocalDate;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -52,22 +54,7 @@ class TradeControllerWebMvcTest {
         // (id, tradeRef, instrumentId, instrumentSymbol, counterpartyId, counterpartyName,
         //  assetClass, side, quantity, price, tradeDate, status, createdAt, modifiedAt).
         Instant now = Instant.now();
-        when(tradeService.create(any())).thenReturn(
-                new TradeResponse(
-                        42L,
-                        "TRD-20260315-9999",
-                        1L,
-                        "SAP.DE",
-                        1L,
-                        "Apex Brokers Inc",
-                        "EQUITY",
-                        "BUY",
-                        new BigDecimal("100.0000"),
-                        new BigDecimal("245.50"),
-                        LocalDate.now(),
-                        "PENDING",
-                        now,
-                        now));
+        when(tradeService.create(any(TradeRequest.class), anyString())).thenReturn(new Trade());
 
         mockMvc.perform(post("/api/v1/trades")
                         .contentType(MediaType.APPLICATION_JSON)
