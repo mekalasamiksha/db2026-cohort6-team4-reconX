@@ -32,7 +32,6 @@ spring:
       hibernate.format_sql: true
       hibernate.jdbc.time_zone: UTC
 
-  # ADV081-ADV082 — Caffeine cache config; per-cache spec overrides the global one.
   cache:
     cache-names: instruments,counterparties
     caffeine:
