@@ -184,6 +184,55 @@ return saved;
 }
     
 
+    // Load existing trade or return 404
+    Trade trade = tradeRepo.findById(id)
+            .orElseThrow(() -> new TradeNotFoundException(String.valueOf(id)));
+
+    // Prevent duplicate trade reference
+    tradeRepo.findByTradeRef(req.tradeRef())
+            .filter(t -> !t.getId().equals(id))
+            .ifPresent(t -> {
+                throw new DuplicateTradeRefException(req.tradeRef());
+            });
+
+    // Load referenced entities
+    var instrument = instRepo.findById(req.instrumentId())
+            .orElseThrow(() ->
+                    new IllegalArgumentException("Instrument not found"));
+
+    var counterparty = cpRepo.findById(req.counterpartyId())
+            .orElseThrow(() ->
+                    new IllegalArgumentException("Counterparty not found"));
+
+    // Replace every mutable field
+    trade.setTradeRef(req.tradeRef());
+    trade.setInstrument(instrument);
+    trade.setCounterparty(counterparty);
+    trade.setAssetClass(req.assetClass());
+    trade.setSide(req.side());
+    trade.setQuantity(req.quantity());
+    trade.setPrice(req.price());
+    trade.setTradeDate(req.tradeDate());
+
+    /*
+    // Uncomment when ADV129 is implemented
+    events.publish(
+            new TradeEvent(
+                    UUID.randomUUID(),
+                    trade.getTradeRef(),
+                    TradeEvent.EventType.TRADE_UPDATED,
+                    Instant.now(),
+                    actor,
+                    null,
+                    trade.getStatus()
+            )
+    );
+    */
+
+    return trade;
+}
+    
+
     @Transactional
 public Trade updateStatus(Long id, String status, String actor) {
 

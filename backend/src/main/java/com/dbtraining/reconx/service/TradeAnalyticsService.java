@@ -72,6 +72,7 @@ public class TradeAnalyticsService {
                         );
                     }
             ));
+}
     }
 
     /**
@@ -114,6 +115,12 @@ public class TradeAnalyticsService {
     // Following student guides to do so
     private long counterpartyIdOf(TradeType t) {
         // TODO(TICKET-ADV018): exhaustive switch over the sealed TradeType
+        // hierarchy returning t.counterpartyId() for each concrete subtype.
+        throw new UnsupportedOperationException("TICKET-ADV018");
+    }
+
+    public record NotionalSummary(long count, BigDecimal total) {
+    }
         //   hierarchy returning t.counterpartyId() for each concrete subtype.
         return switch (t) {
             case EquityTrade e                                 -> e.counterpartyId();
