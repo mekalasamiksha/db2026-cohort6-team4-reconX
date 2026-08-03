@@ -1,7 +1,0 @@
-<changeSet id="ADV067-add-deleted-at" author="your-name">
-
-    <addColumn tableName="trades">
-        <column name="deleted_at" type="TIMESTAMP"/>
-    </addColumn>
-
-</changeSet>
