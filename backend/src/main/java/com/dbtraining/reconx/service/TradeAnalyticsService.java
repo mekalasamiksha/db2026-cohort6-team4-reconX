@@ -1,18 +1,6 @@
-package com.dbtraining.reconx.service;
-
-import com.dbtraining.reconx.model.*;
-import org.springframework.stereotype.Service;
-
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
 @Service
 public class TradeAnalyticsService {
 
-    /** TICKET-ADV034 — count + sum of notional per counterparty. */
     public Map<Long, NotionalSummary> notionalByCounterparty(List<? extends TradeType> trades) {
         return trades.stream().collect(Collectors.groupingBy(
                 this::counterpartyIdOf,
@@ -28,7 +16,6 @@ public class TradeAnalyticsService {
         ));
     }
 
-    /** TICKET-ADV035 — VWAP per instrument */
     public Map<String, BigDecimal> vwapByInstrument(List<EquityTrade> equityTrades) {
 
         return equityTrades.stream()
@@ -52,9 +39,7 @@ public class TradeAnalyticsService {
                 ));
     }
 
-    /** TICKET-ADV036 — P&L per instrument */
     public Map<String, BigDecimal> pnlByInstrument(List<EquityTrade> equityTrades) {
-
         return equityTrades.stream().collect(Collectors.groupingBy(
                 EquityTrade::instrumentSymbol,
                 Collectors.mapping(
@@ -69,7 +54,6 @@ public class TradeAnalyticsService {
         return t.side() == Side.SELL ? abs : abs.negate();
     }
 
-    /** TICKET-ADV018 — exhaustive switch */
     private long counterpartyIdOf(TradeType t) {
         return switch (t) {
             case EquityTrade e     -> e.counterpartyId();
@@ -81,7 +65,6 @@ public class TradeAnalyticsService {
 
     public record NotionalSummary(long count, BigDecimal total) {}
 
-    /** Optional: custom collector usage */
     public BigDecimal calculateVwap(List<EquityTrade> trades) {
         return trades.stream().collect(new VwapCollector());
     }
