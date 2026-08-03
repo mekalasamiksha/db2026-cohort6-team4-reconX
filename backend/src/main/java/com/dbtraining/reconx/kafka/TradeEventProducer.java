@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
  * TICKET-ADV129 — TradeEventProducer
  *
  * WHAT:    Publishes TradeEvent messages to the `trade-events` Kafka topic.
- * HOW:     KafkaTemplate<String, TradeEvent>. Key = tradeRef so that all
+ * HOW:     {@code KafkaTemplate<String, TradeEvent>}. Key = tradeRef so that all
  *          events for the same trade hash to the same partition and
  *          preserve ordering.
  * WHY:     Out-of-order events for the same trade would make event sourcing
@@ -44,7 +44,22 @@ public class TradeEventProducer {
         this.template = template;
     }
 
-    public void publish(TradeEvent event) {
-        throw new UnsupportedOperationException("TICKET-ADV129");
-    }
+  public void publish(TradeEvent event) {
+
+    log.debug(
+            "Publishing TradeEvent eventId={} ref={} type={}",
+            event.eventId(),
+            event.tradeRef(),
+            event.eventType()
+    );
+
+    template.send(TOPIC, event.tradeRef(), event)
+            .whenComplete((result, ex) -> {
+                if (ex != null) {
+                    log.error("Failed to publish TradeEvent {}", event.tradeRef(), ex);
+                } else {
+                    log.debug("TradeEvent published successfully for {}", event.tradeRef());
+                }
+            });
+}
 }

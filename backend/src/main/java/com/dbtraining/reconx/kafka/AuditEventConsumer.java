@@ -2,8 +2,11 @@ package com.dbtraining.reconx.kafka;
 
 import com.dbtraining.reconx.dto.TradeEvent;
 import com.dbtraining.reconx.repository.AuditLogRepository;
+import com.dbtraining.reconx.repository.entity.AuditLogEntry;
+import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
 /**
@@ -41,12 +44,38 @@ import org.springframework.stereotype.Component;
 @Component
 public class AuditEventConsumer {
 
-    private static final Logger log = LoggerFactory.getLogger(AuditEventConsumer.class);
-    private final AuditLogRepository repo;
+    private static final Logger log =
+            LoggerFactory.getLogger(AuditEventConsumer.class);
 
-    public AuditEventConsumer(AuditLogRepository repo) { this.repo = repo; }
+    private final AuditLogRepository auditRepo;
 
-    public void onTradeEvent(TradeEvent e) {
-        throw new UnsupportedOperationException("TICKET-ADV132");
+    public AuditEventConsumer(AuditLogRepository auditRepo) {
+        this.auditRepo = auditRepo;
+    }
+
+    @Transactional
+    @KafkaListener(
+            topics = "trade-events",
+            groupId = "audit-service",
+            containerFactory = "tradeEventListenerContainerFactory"
+    )
+    public void onTradeEvent(TradeEvent event) {
+
+        AuditLogEntry entry = AuditLogEntry.builder()
+                .eventId(event.eventId().toString())
+                .tradeRef(event.tradeRef())
+                .operation(event.eventType().name())
+                .before(event.before())
+                .after(event.after())
+                .occurredAt(event.timestamp())
+                .build();
+
+        auditRepo.save(entry);
+
+        log.debug(
+                "Audit row persisted for eventId={} tradeRef={}",
+                event.eventId(),
+                event.tradeRef()
+        );
     }
 }

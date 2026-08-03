@@ -33,6 +33,13 @@ public final class TradeFactory {
      *      helper below.
      *   3. The switch must be exhaustive — every TradeType.AssetClass case handled.
      */
+    /**
+     * Create a typed trade from a generic payload map.
+     * @param assetClass asset class string, case-insensitive.
+     * @param p payload values keyed by field name.
+     * @return the matching {@link TradeType} implementation.
+     * @throws IllegalArgumentException if the asset class is unknown.
+     */
     public static TradeType create(String assetClass, Map<String, Object> p) {
         TradeType.AssetClass ac = TradeType.AssetClass.valueOf(assetClass.toUpperCase());
         return switch (ac) {
