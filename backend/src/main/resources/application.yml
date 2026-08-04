@@ -59,7 +59,6 @@ spring:
 server:
   servlet:
     context-path: /api
-  port: 8082
 
 # =============================================================================
 # TICKET-ADV083-ADV086 / ADV097 — Actuator + Prometheus exposure
