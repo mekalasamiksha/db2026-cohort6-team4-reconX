@@ -56,8 +56,7 @@ public class AuditEventConsumer {
     @Transactional
     @KafkaListener(
             topics = "trade-events",
-            groupId = "audit-service",
-            containerFactory = "tradeEventListenerContainerFactory"
+            groupId = "audit-service"
     )
     public void onTradeEvent(TradeEvent event) {
 

@@ -3,7 +3,6 @@ package com.dbtraining.reconx.domain;
 import com.dbtraining.reconx.repository.entity.Counterparty;
 import com.dbtraining.reconx.model.TradeType.AssetClass;
 import jakarta.persistence.*;
-import org.hibernate.envers.Audited;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -13,13 +12,12 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.util.Objects;
 
-@Entity
+@Entity(name = "LegacyTrade")
 @Table(name = "trades", indexes = {
         @Index(name = "idx_trades_trade_date", columnList = "trade_date"),
         @Index(name = "idx_trades_status",     columnList = "status")
 })
 @EntityListeners(AuditingEntityListener.class)
-@Audited
 public class Trade {
 
     @Id

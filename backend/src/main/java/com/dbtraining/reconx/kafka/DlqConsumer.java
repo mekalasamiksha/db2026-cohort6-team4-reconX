@@ -26,8 +26,7 @@ public class DlqConsumer {
 
     @KafkaListener(
             topics = "trade-events-dlq",
-            groupId = "dlq-monitor",
-            containerFactory = "tradeEventListenerContainerFactory"
+            groupId = "dlq-monitor"
     )
     public void onDlqMessage(ConsumerRecord<String, TradeEvent> record,
                              @Header(KafkaHeaders.EXCEPTION_MESSAGE) String exMsg) {

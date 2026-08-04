@@ -45,6 +45,7 @@
             <column name="asset_class" type="VARCHAR(20)"><constraints nullable="false"/></column>
             <column name="currency" type="VARCHAR(3)"><constraints nullable="false"/></column>
             <column name="isin" type="VARCHAR(12)"><constraints unique="true"/></column>
+            <column name="metadata" type="CLOB"/>
         </createTable>
         <rollback>
             <dropTable tableName="instruments"/>
