@@ -46,8 +46,7 @@ public class ReconciliationConsumer {
 
     @KafkaListener(
             topics = "trade-events",
-            groupId = "recon-service",
-            containerFactory = "tradeEventListenerContainerFactory"
+            groupId = "recon-service"
     )
     public void onTradeEvent(TradeEvent event) {
 

@@ -34,6 +34,7 @@ public interface TradeMapper {
     @Mapping(target = "status",        ignore = true)   // defaulted to PENDING
     @Mapping(target = "createdAt",     ignore = true)
     @Mapping(target = "modifiedAt",    ignore = true)
+    @Mapping(target = "deletedAt",      ignore = true)
     Trade toEntity(TradeRequest req);
 
     @Named("statusToString")

@@ -10,11 +10,15 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
 public class ReconciliationEngine {
+
+    private final Set<String> pendingReconJobs = ConcurrentHashMap.newKeySet();
 
     @Timed(value = "reconciliation.duration", description = "Wall time of reconcile()",
            percentiles = {0.5, 0.95, 0.99}, histogram = true)
@@ -50,6 +54,14 @@ public class ReconciliationEngine {
                 .thenApply(v -> futures.stream()
                         .flatMap(f -> f.join().stream())
                         .toList());
+    }
+
+    public void scheduleRecon(String tradeRef) {
+        pendingReconJobs.add(tradeRef);
+    }
+
+    public void cancelPendingRecon(String tradeRef) {
+        pendingReconJobs.remove(tradeRef);
     }
 
     private ReconResult matchOne(TradeType internal, TradeType external, ReconciliationRule rule) {

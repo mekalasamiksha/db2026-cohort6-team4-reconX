@@ -1,14 +1,9 @@
 package com.dbtraining.reconx.domain;
 
 import com.dbtraining.reconx.model.TradeType.AssetClass;
-import io.hypersistence.utils.hibernate.type.json.JsonBinaryType;
 import jakarta.persistence.*;
-import org.hibernate.annotations.Type;
 
-import java.util.HashMap;
-import java.util.Map;
-
-@Entity
+@Entity(name = "LegacyInstrument")
 @Table(name = "instruments")
 public class Instrument {
 
@@ -30,13 +25,11 @@ public class Instrument {
     private String currency;
 
     /**
-     * JSONB metadata: tick size, lot size, exchange code, etc.
-     * On H2 (dev profile) this stores as a CLOB; on Postgres it's true JSONB
-     * and is queryable via the @> operator.
+        * Legacy metadata blob for the audited domain entity.
      */
-    @Type(JsonBinaryType.class)
-    @Column(columnDefinition = "jsonb")
-    private Map<String, Object> metadata = new HashMap<>();
+        @Lob
+        @Column(name = "metadata", columnDefinition = "CLOB")
+        private String metadata;
 
     // --- getters / setters omitted for brevity ---
 }
